@@ -4,22 +4,27 @@ import tkinter as tk
 wnd=tk.Tk()
 wnd.title('ugadaga')
 vc = getvoc(vocFileName)
-
+novc = []
 def checkword():
+  global beginscore
+  global novc
   if btn['text'] == 'Начать':
     global gw
     gw = guess(vc,level,int(lblWordLen['text']))
     btn['text'] = 'Ok'
     com['text'] = 'загадано'
     ent['state'] = 'normal'
+    beginscore = time() - 20
     return()
   wordent = ent.get()
   ent.delete(0,tk.END)
-  print(wordent)
   if wordent:
+    beginscore -= 20
+    lbl_score['text'] = str(int(time()-beginscore))
     if not wordent in vc:
       com['fg'] = errColor
       com['text'] = 'не знаю такого слова'
+      novc.append(wordent)
       return()
     vc[wordent] += 1
     if len(wordent) != len(gw):
@@ -45,13 +50,15 @@ def checkword():
     btn['text'] = 'Начать'
     ent['state'] = 'disabled'
     WordLenPlus()
-    guessed(vc, vocFileName)
+    guessed(vc, novc, vocFileName)
+    novc = []
+  print(wordent)
 
 def rt(event):
   checkword()
 
 def exit_win(event):
-  guessed(vc, vocFileName)
+  guessed(vc, novc, vocFileName)
   wnd.destroy()
 
 def WordLenPlus():
@@ -73,6 +80,7 @@ btn = tk.Button(
   text = 'Начать',
   command = checkword
   )
+lbl_score = tk.Label(width=18)
 
 frWordLen = tk.LabelFrame(text = 'длинна загаданного\nслова')
 btnPlus = tk.Button(frWordLen, text = '+', command = WordLenPlus)
@@ -84,6 +92,7 @@ com.pack()
 ent.pack()
 btn.pack()
 frWordLen.pack()
+lbl_score.pack()
 btnPlus.grid(column = 2, row = 0)
 lblWordLen.grid(column = 1, row = 0)
 btnMinus.grid(column = 0, row = 0)
